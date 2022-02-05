@@ -19,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.loot.LootContext;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import static net.md_5.bungee.api.ChatColor.*;
@@ -95,44 +94,12 @@ public final class RandomSummon extends JavaPlugin implements Listener {
 
     Ravager ravBossSloth;
 
-    @EventHandler
-    public void slothDeath (EntityDeathEvent event) {
-        if (!event.getEntityType().equals(ravBossSloth)) {
-            return;
-        }
-        if (event.getEntity().getKiller() == null) {
-            return;
-        }
-        LivingEntity entity = event.getEntity();
-        Location location = entity.getLocation();
-        Player player = entity.getKiller();
-        int looting_mod = player.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-
-        LootContext.Builder builder = new LootContext.Builder(location);
-        builder.lootedEntity(event.getEntity());
-        builder.lootingModifier(looting_mod);
-        builder.killer(player);
-        LootContext lootContext = builder.build();
-
-        loot_table_ravagerBossSloth slothLoot = new loot_table_ravagerBossSloth();
-        Collection<ItemStack> drops = slothLoot.populateLoot(new Random(), lootContext);
-        ArrayList<ItemStack> items = (ArrayList<ItemStack>) drops;
-
-        event.getDrops().clear();
-
-        for (int a = 0; a < 4; a++) {
-            if (items.get(a).getAmount() > 0) {
-                location.getWorld().dropItemNaturally(location, items.get(a));
-            }
-        }
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 
         Player p = (Player) sender;
         if(p.hasPermission("RandomSummon.srmPerms")) {
-            p.sendMessage(GREEN + "Random mob summoned successfully");
+            p.sendMessage(GREEN + "Random mob summoned successfully.");
 
             int upperbound = getConfig().getInt("RandomUpperbound");
             Random random = new Random();
@@ -167,20 +134,42 @@ public final class RandomSummon extends JavaPlugin implements Listener {
                 loc.add(0, 0, 5);
             }
 
+            //old spawn logic, causes issues with suffocation
+            /*while (!p.getWorld().getBlockAt(loc).isEmpty()) {
+                loc.add(0, 1, 0);
+            }*/
+
             Block middle = loc.getBlock();
             int radius = 1;
+            int xrad;
+            int zrad;
+            int yfix;
 
-            for (int xrad = radius; xrad >= -radius; xrad--){
-                for(int zrad = radius; zrad >= -radius; zrad--) {
-                    for(int yfix = 2; yfix >= 0; yfix--) {
+            for (xrad = radius; xrad >= -radius; xrad--){
+                for(zrad = radius; zrad >= -radius; zrad--) {
+                    for(yfix = 2; yfix >= 0; yfix--) {
                         if(!middle.getRelative(xrad, yfix, zrad).isEmpty()) {
                             loc.add(0, 1, 0);
                         }
                     }
                 }
+                if(!loc.getBlock().isEmpty()) {
+                    xrad = radius;
+                    zrad = radius;
+                    yfix = 2;
+                }
             }
 
-            if(cmd.getName().equalsIgnoreCase("summonrandommob") || cmd.getName().equalsIgnoreCase("srm")){
+            int intX = (int) loc.getX();
+            int intY = (int) loc.getY();
+            int intZ = (int) loc.getZ();
+            loc.setX(intX);
+            loc.setY(intY);
+            loc.setZ(intZ);
+
+
+
+            //if(cmd.getName().equalsIgnoreCase("summonrandommob") || cmd.getName().equalsIgnoreCase("srm")){
                 if(rnd <= getConfig().getInt("weightCreeper")) {
                     p.getWorld().spawnEntity(loc, EntityType.CREEPER);
                 } else if(rnd >= getConfig().getInt("weightCreeper") && rnd <= getConfig().getInt("weightChargedCreeper")) {
@@ -229,7 +218,7 @@ public final class RandomSummon extends JavaPlugin implements Listener {
                 } else if(rnd >= getConfig().getInt("weightBlaze") + 1 && rnd <= getConfig().getInt("weightMagmaCube")) {
                     p.getWorld().spawnEntity(loc, EntityType.MAGMA_CUBE);
                 } else if(rnd >= getConfig().getInt("weightMagmaCube") + 1 && rnd <= getConfig().getInt("weightRavagerBossSloth")) {
-                    Ravager ravBossSloth = (Ravager) p.getWorld().spawnEntity(loc, EntityType.RAVAGER);
+                    ravBossSloth = (Ravager) p.getWorld().spawnEntity(loc, EntityType.RAVAGER);
                     ravBossSloth.setCustomName("&l&#BD9168S&#BD9A7Al&#D4B37Fo&#BD9A7At&#BD9168h");
                     ravBossSloth.setCustomNameVisible(true);
                     ravBossSloth.setGlowing(true);
@@ -328,13 +317,46 @@ public final class RandomSummon extends JavaPlugin implements Listener {
                     System.out.println("Something went wrong, rnd = " + rnd);
 
                 }
-            } else {
-            p.sendMessage(ChatColor.RED.toString() + BOLD + "You do not have the required permissions to run this command.");
-            }
+            //}
 
+        } else {
+            p.sendMessage(ChatColor.RED.toString() + "You do not have the required permissions to run this command.");
         }
         return true; //???
     };
+
+    @EventHandler
+    public void slothDeath (EntityDeathEvent event) {
+        if (!event.getEntityType().equals(ravBossSloth)) {
+            return;
+        }
+        if (event.getEntity().getKiller() == null) {
+            return;
+        }
+        LivingEntity entity = event.getEntity();
+        Location location = entity.getLocation();
+        Player player = entity.getKiller();
+        int looting_mod = player.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+
+        LootContext.Builder builder = new LootContext.Builder(location);
+        builder.lootedEntity(event.getEntity());
+        builder.lootingModifier(looting_mod);
+        builder.killer(player);
+        LootContext lootContext = builder.build();
+
+        loot_table_ravagerBossSloth slothLoot = new loot_table_ravagerBossSloth();
+        Collection<ItemStack> drops = slothLoot.populateLoot(new Random(), lootContext);
+        ArrayList<ItemStack> items = (ArrayList<ItemStack>) drops;
+
+        event.getDrops().clear();
+
+        for (int a = 0; a < 4; a++) {
+            if (items.get(a).getAmount() > 0) {
+                location.getWorld().dropItemNaturally(location, items.get(a));
+            }
+        }
+    }
+
     @Override
     public void onDisable() {
         // Plugin shutdown logic
