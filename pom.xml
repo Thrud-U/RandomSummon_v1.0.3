@@ -6,7 +6,7 @@
 
     <groupId>me.thrudgluttony</groupId>
     <artifactId>RandomSummon</artifactId>
-    <version>v1.0.2</version>
+    <version>v1.0.3</version>
     <packaging>jar</packaging>
 
     <name>RandomSummon</name>
