@@ -56,3 +56,8 @@ weightStriderJockey: 10250
 weightGoat: 11000
 
 RandomUpperbound: 11001
+
+PermissionsList:
+  - ""
+  - ""
+  - ""
