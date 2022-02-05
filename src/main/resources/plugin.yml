@@ -1,0 +1,11 @@
+name: RandomSummon
+version: '${project.version}'
+main: me.thrudgluttony.randomsummon.RandomSummon
+api-version: 1.18
+authors: [ Thrud, Gluttony ]
+description: A plugin to summon a random mob when the command is used.
+commands:
+  summonrandommob:
+    description: Summons a random mob with a certain chance for each mob based on the config file.
+    aliases: srm
+    usage: /<command>
