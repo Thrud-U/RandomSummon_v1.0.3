@@ -170,9 +170,9 @@ public final class RandomSummon extends JavaPlugin implements Listener {
             Block middle = loc.getBlock();
             int radius = 1;
 
-            for (int xrad = radius; radius >= -radius; xrad--){
-                for(int zrad = radius; radius >= -radius; zrad--) {
-                    for(int yfix = 2; radius >= 0; yfix--) {
+            for (int xrad = radius; xrad >= -radius; xrad--){
+                for(int zrad = radius; zrad >= -radius; zrad--) {
+                    for(int yfix = 2; yfix >= 0; yfix--) {
                         if(!middle.getRelative(xrad, yfix, zrad).isEmpty()) {
                             loc.add(0, 1, 0);
                         }
